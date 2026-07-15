@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Byte & Bite | Modern Coffee & Code</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom SVG Favicon -->
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+    
+    <!-- AOS (Animate on Scroll) CSS -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Main Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Muzičko dugme */
+        .music-toggle {
+            background: rgba(255, 122, 0, 0.1);
+            border: 1px solid #ff7a00;
+            color: #ff7a00;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            margin-left: 15px;
+        }
+        .music-toggle:hover {
+            background: #ff7a00;
+            color: #1a1e23;
+        }
+
+        /* NOVO: Dugme za Mobile Preview u headeru */
+        .preview-toggle {
+            background: rgba(0, 191, 255, 0.1);
+            border: 1px solid #00bfff;
+            color: #00bfff;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+            margin-left: 10px;
+        }
+        .preview-toggle:hover {
+            background: #00bfff;
+            color: #1a1e23;
+        }
+
+        /* --- STILIZACIJA TELEFONA SIMULATORA --- */
+        .phone-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 12, 15, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .phone-modal.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        /* 3D efekat kućišta telefona */
+        .phone-container {
+            position: relative;
+            width: 320px;
+            height: 640px;
+            background: #000;
+            border: 12px solid #2d2d2d;
+            border-radius: 40px;
+            box-shadow: 
+                0 0 0 4px #1f1f1f,
+                0 25px 50px -12px rgba(0, 0, 0, 0.8),
+                inset 0 0 10px rgba(255, 255, 255, 0.1);
+            transform: scale(0.7) rotateY(15deg) rotateX(10deg);
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            perspective: 1000px;
+        }
+        .phone-modal.active .phone-container {
+            transform: scale(1) rotateY(0deg) rotateX(0deg);
+        }
+        /* Zvučnik i kamera na vrhu (Notch) */
+        .phone-notch {
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 22px;
+            background: #2d2d2d;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .phone-notch::before {
+            content: '';
+            width: 40px;
+            height: 4px;
+            background: #111;
+            border-radius: 10px;
+            margin-bottom: 2px;
+        }
+        /* Ekran telefona (Iframe koji učitava sajt) */
+        .phone-screen {
+            width: 100%;
+            height: 100%;
+            border-radius: 28px;
+            overflow: hidden;
+            border: none;
+            background: #1a1e23;
+        }
+        /* Dugme za zatvaranje simulatora */
+        .phone-close-btn {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: #ff7a00;
+            color: #1a1e23;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 122, 0, 0.4);
+        }
+        .phone-close-btn:hover {
+            transform: scale(1.1);
+            background: #ff9533;
+        }
+
+        @media (max-width: 768px) {
+            .music-toggle, .preview-toggle {
+                margin: 10px 0;
+                display: flex;
+                justify-content: center;
+                width: fit-content;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- AUDIO PLAYER (Lagana Lo-Fi muzika bez autorskih prava) -->
+    <audio id="bg-music" loop>
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- NOVO: MODAL SA SIMULATOROM TELEFONA -->
+    <div class="phone-modal" id="phone-modal">
+        <button class="phone-close-btn" id="phone-close-btn">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="phone-container">
+            <div class="phone-notch"></div>
+            <!-- Ovde dinamički učitavamo naš sajt pomoću JS-a -->
+            <iframe class="phone-screen" id="phone-iframe" src=""></iframe>
+        </div>
+    </div>
+
+    <!-- NAVIGATION HEADER -->
+    <header class="header">
+        <a href="#" class="logo">
+            <i class="fa-solid fa-mug-hot"></i> Byte <span class="accent">&</span> Bite
+        </a>
+        
+        <div class="menu-btn" id="menu-btn">
+            <i class="fa-solid fa-bars"></i>
+        </div>
+
+        <nav class="navbar" id="navbar">
+            <a href="#home" class="active">Home</a>
+            <a href="#about">Our Story</a>
+            <a href="#menu">Menu</a>
+            <a href="#contact">Visit Us</a>
+            <!-- Muzičko dugme -->
+            <button id="music-btn" class="music-toggle">
+                <i class="fa-solid fa-play"></i> Play Lo-Fi
+            </button>
+            <!-- NOVO: Dugme za simulator telefona -->
+            <button id="preview-btn" class="preview-toggle">
+                <i class="fa-solid fa-mobile-screen"></i> Mobile View
+            </button>
+        </nav>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="hero" id="home">
+        <div class="hero-overlay"></div>
+        <!-- Dodata animacija ulaska za Hero tekst -->
+        <div class="hero-content" data-aos="fade-up" data-aos-duration="1000">
+            <span class="hero-subtitle">Novi Sad's Ultimate Tech Cafe</span>
+            <h1>Great Coffee &<br><span>Byte-Sized</span> Delights</h1>
+            <p>Welcome to the cozy corner where clean code meets craft coffee. Fuel your programming sessions with premium espresso and fresh pastries.</p>
+            <div class="hero-buttons">
+                <a href="#menu" class="btn btn-primary">Explore Menu</a>
+                <a href="#contact" class="btn btn-secondary">Find Us</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ABOUT SECTION -->
+    <section class="about" id="about">
+        <div class="container">
+            <div class="about-grid">
+                <!-- Slika klizi sleva -->
+                <div class="about-img-container" data-aos="fade-right" data-aos-duration="800">
+                    <img src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=800&q=80" alt="Byte & Bite interior cozy cafe table" class="about-img">
+                    <div class="experience-badge">
+                        <h3>1Gbps</h3>
+                        <p>Fiber Wi-Fi</p>
+                    </div>
+                </div>
+                <!-- Tekst klizi zdesna -->
+                <div class="about-content" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
+                    <span class="section-tag">About Us</span>
+                    <h2>The Perfect Blend of <br>Coffee & Tech</h2>
+                    <p>Founded by passionate developers who got tired of noisy coffee shops and poor Wi-Fi, <strong>Byte & Bite</strong> is designed specifically for tech enthusiasts, freelancers, and coffee connoisseurs.</p>
+                    <p>We provide ultra-fast internet, ergonomic seating, plenty of power outlets, and of course, locally roasted single-origin specialty coffee.</p>
+                    
+                    <div class="features-list">
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fa-solid fa-wifi"></i></div>
+                            <div>
+                                <h4>Gigabit Internet</h4>
+                                <p>Symmetrical connection with 99.9% uptime for developers.</p>
+                            </div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon"><i class="fa-solid fa-plug"></i></div>
+                            <div>
+                                <h4>Power Everywhere</h4>
+                                <p>Power strips and USB-C fast charging ports at every single seat.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MENU SECTION -->
+    <section class="menu" id="menu">
+        <div class="container">
+            <div class="section-header" data-aos="fade-up" data-aos-duration="600">
+                <span class="section-tag">Craft Menu</span>
+                <h2>Sustenance for Mind & Body</h2>
+                <p>Carefully selected items to keep you energized, focused, and ready to compile.</p>
+            </div>
+
+            <div class="menu-grid">
+                <!-- Card 1 -->
+                <div class="menu-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="100">
+                    <div class="menu-img-holder">
+                        <img src="https://images.unsplash.com/photo-1509042239860-f550ce710b93?auto=format&fit=crop&w=500&q=80" alt="Double Espresso">
+                        <span class="card-tag">Hot</span>
+                    </div>
+                    <div class="menu-info">
+                        <div class="menu-title-row">
+                            <h3>The 10x Developer</h3>
+                            <span class="price">$3.50</span>
+                        </div>
+                        <p>A flawless double shot of our house espresso. Compiles your ideas instantly with no memory leaks.</p>
+                    </div>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="menu-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="200">
+                    <div class="menu-img-holder">
+                        <img src="https://images.unsplash.com/photo-1536256263959-770b48d82b0a?auto=format&fit=crop&w=500&q=80" alt="Beautiful Matcha Latte Art">
+                        <span class="card-tag">Healthy</span>
+                    </div>
+                    <div class="menu-info">
+                        <div class="menu-title-row">
+                            <h3>CSS Matcha Latte</h3>
+                            <span class="price">$4.50</span>
+                        </div>
+                        <p>Organic matcha perfectly styled and responsive to your morning mood. Rich in antioxidants.</p>
+                    </div>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="menu-card" data-aos="fade-up" data-aos-duration="800" data-aos-delay="300">
+                    <div class="menu-img-holder">
+                        <img src="https://images.unsplash.com/photo-1533134242443-d4fd215305ad?auto=format&fit=crop&w=500&q=80" alt="Keyboard Waffles">
+                        <span class="card-tag">Sweet</span>
+                    </div>
+                    <div class="menu-info">
+                        <div class="menu-title-row">
+                            <h3>Keyboard Waffles</h3>
+                            <span class="price">$6.00</span>
+                        </div>
+                        <p>Crispy, mechanical-styled waffles served with warm maple syrup, fresh berries, and powdered sugar.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CONTACT & INFO SECTION -->
+    <section class="contact" id="contact">
+        <div class="container">
+            <div class="contact-grid">
+                <div class="contact-info" data-aos="fade-right" data-aos-duration="800">
+                    <span class="section-tag">Find Us</span>
+                    <h2>Drop By For a Bite</h2>
+                    <p>We are situated in the heart of Novi Sad's tech district. Come co-work with us or just grab a quick cup of coffee.</p>
+                    
+                    <div class="info-details">
+                        <div class="info-block">
+                            <i class="fa-solid fa-location-dot"></i>
+                            <div>
+                                <h4>Location</h4>
+                                <p>123 Tech Avenue, Novi Sad, Serbia</p>
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <i class="fa-solid fa-phone"></i>
+                            <div>
+                                <h4>Phone</h4>
+                                <p>+381 21 555 444</p>
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <i class="fa-solid fa-envelope"></i>
+                            <div>
+                                <h4>Email</h4>
+                                <p>hello@byteandbite.com</p>
+                            </div>
+                        </div>
+                        <div class="info-block">
+                            <i class="fa-solid fa-clock"></i>
+                            <div>
+                                <h4>Working Hours</h4>
+                                <p>Mon - Sat: 08:00 AM - 10:00 PM<br>Sunday: Closed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Forma klizi zdesna -->
+                <div class="contact-form-wrapper" data-aos="fade-left" data-aos-duration="800" data-aos-delay="150">
+                    <h3>Send Us a Message</h3>
+                    <p>Got a question or want to book a workshop table? Fill out the form below.</p>
+                    <form class="contact-form" id="contact-form">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Your Email</label>
+                            <input type="email" id="email" placeholder="john@example.com" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" rows="4" placeholder="How can we help you?" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Send Message</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">
+                    <a href="#"><i class="fa-solid fa-mug-hot"></i> Byte <span class="accent">&</span> Bite</a>
+                    <p>Fueling Novi Sad's developer community since 2026.</p>
+                </div>
+                <div class="footer-socials">
+                    <a href="https://github.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-github"></i></a>
+                    <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i></a>
+                    <a href="https://instagram.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://x.com" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-x-twitter"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 Byte & Bite. Crafted with passion for programming portfolios.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AOS (Animate on Scroll) JS skripta sa unpkg -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- Tvoj JS -->
+    <script src="script.js"></script>
+</body>
+</html>
