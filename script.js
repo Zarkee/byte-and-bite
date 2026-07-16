@@ -1,5 +1,5 @@
 // --- 1. EASTER EGG (Console) ---
-// Ispisujemo poruku samo ako stranica NIJE učitana unutar iframe-a (simulatora)
+// Ispisujemo poruku samo ako stranica NIJE učitana unutar simulatora (iframe-a)
 if (window.self === window.top) {
     const coffeeAscii = `
     (  )   (   )  )
@@ -81,7 +81,6 @@ const phoneCloseBtn = document.getElementById("phone-close-btn");
 const phoneIframe = document.getElementById("phone-iframe");
 
 // PREVENT RECURSION: 
-// If the page is already rendered inside an iframe (simulator), hide the "Mobile View" button.
 if (window.self !== window.top) {
     if (previewBtn) previewBtn.style.display = "none";
 }
@@ -133,7 +132,7 @@ if (tabButtons.length > 0 && menuContents.length > 0) {
                 targetContent.classList.add("active");
             }
             
-            // Refresh AOS layouts for new active container elements
+            // Refresh AOS layouts
             AOS.refresh();
         });
     });
@@ -144,4 +143,33 @@ if (tabButtons.length > 0 && menuContents.length > 0) {
 AOS.init({
     once: false,
     offset: 120,
+});
+
+
+// --- 7. SCROLL SPY (Praćenje aktivne sekcije prilikom skrolovanja) ---
+const sections = document.querySelectorAll("section[id]");
+
+window.addEventListener("scroll", () => {
+    const scrollY = window.pageYOffset;
+
+    sections.forEach(current => {
+        const sectionHeight = current.offsetHeight;
+        const sectionTop = current.offsetTop - 150; 
+        const sectionId = current.getAttribute("id");
+        
+        // Povezujemo detekciju ID-eva sa odgovarajućim linkom u navigaciji
+        let querySelectorString = `.navbar a[href*='${sectionId}']`;
+        if (sectionId === "menu-cards") {
+            querySelectorString = `.navbar a[href*='menu']`;
+        }
+        
+        const navLink = document.querySelector(querySelectorString);
+
+        if (navLink) {
+            if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                document.querySelectorAll(".navbar a").forEach(link => link.classList.remove("active"));
+                navLink.classList.add("active");
+            }
+        }
+    });
 });
