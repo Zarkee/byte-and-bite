@@ -71,31 +71,34 @@ navLinks.forEach(link => {
 });
 
 
-// --- 4. NOVO: CONTROLS FOR MOBILE PREVIEW SIMULATOR ---
+// --- 4. CONTROLS FOR MOBILE PREVIEW SIMULATOR ---
 const previewBtn = document.getElementById("preview-btn");
 const phoneModal = document.getElementById("phone-modal");
 const phoneCloseBtn = document.getElementById("phone-close-btn");
 const phoneIframe = document.getElementById("phone-iframe");
 
+// PREVENT RECURSION: 
+// If the page is already rendered inside an iframe (simulator), hide the "Mobile View" button.
+if (window.self !== window.top) {
+    if (previewBtn) previewBtn.style.display = "none";
+}
+
 if (previewBtn && phoneModal && phoneCloseBtn && phoneIframe) {
-    // Otvaranje simulatora
+    // Open simulator
     previewBtn.addEventListener("click", () => {
-        // Postavi izvor iframe-a na trenutni URL stranice
         phoneIframe.src = window.location.href;
         phoneModal.classList.add("active");
-        // Privremeno stopiramo skrolovanje glavne stranice dok gledamo telefon
         document.body.style.overflow = "hidden";
     });
 
-    // Zatvaranje simulatora
+    // Close simulator
     phoneCloseBtn.addEventListener("click", () => {
         phoneModal.classList.remove("active");
-        // Praznimo src da bi se zaustavio rad u pozadini
         phoneIframe.src = "";
         document.body.style.overflow = "auto";
     });
 
-    // Zatvaranje na klik van samog telefona
+    // Close simulator on outside click
     phoneModal.addEventListener("click", (e) => {
         if (e.target === phoneModal) {
             phoneModal.classList.remove("active");
@@ -106,7 +109,35 @@ if (previewBtn && phoneModal && phoneCloseBtn && phoneIframe) {
 }
 
 
-// --- 5. INITIALIZE AOS (Animate On Scroll) ---
+// --- 5. MENU TAB SWITCHER ---
+const tabButtons = document.querySelectorAll(".tab-btn");
+const menuContents = document.querySelectorAll(".menu-content");
+
+if (tabButtons.length > 0 && menuContents.length > 0) {
+    tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            // Reset active tabs and contents
+            tabButtons.forEach(b => b.classList.remove("active"));
+            menuContents.forEach(c => c.classList.remove("active"));
+
+            // Activate current tab button
+            btn.classList.add("active");
+            
+            // Show target content block
+            const targetId = btn.getAttribute("data-target");
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) {
+                targetContent.classList.add("active");
+            }
+            
+            // Refresh AOS layouts for new active container elements
+            AOS.refresh();
+        });
+    });
+}
+
+
+// --- 6. INITIALIZE AOS (Animate On Scroll) ---
 AOS.init({
     once: false,
     offset: 120,
