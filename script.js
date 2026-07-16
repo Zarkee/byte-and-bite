@@ -1,5 +1,7 @@
 // --- 1. EASTER EGG (Console) ---
-const coffeeAscii = `
+// Ispisujemo poruku samo ako stranica NIJE učitana unutar iframe-a (simulatora)
+if (window.self === window.top) {
+    const coffeeAscii = `
     (  )   (   )  )
      ) (   )  (  (
      ( )  (    ) )
@@ -11,16 +13,17 @@ const coffeeAscii = `
    \\___________/
 `;
 
-console.log(
-    `%c${coffeeAscii}%c\n\nHello World! ☕️💻\n\n` +
-    `We see you like inspecting code! As a fellow developer, here is a secret 10% discount code for your first visit to our cafe:\n\n` +
-    `👉 %cCODE: COFFEE_AND_CODE_2026%c\n\n` +
-    `Happy coding! 🚀`,
-    "color: #ff7a00; font-family: monospace; font-weight: bold;",
-    "color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 14px;",
-    "background: #ff7a00; color: #1a1e23; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-family: monospace;",
-    "color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 14px;"
-);
+    console.log(
+        `%c${coffeeAscii}%c\n\nHello World! ☕️💻\n\n` +
+        `We see you like inspecting code! As a fellow developer, here is a secret 10% discount code for your first visit to our cafe:\n\n` +
+        `👉 %cCODE: COFFEE_AND_CODE_2026%c\n\n` +
+        `Happy coding! 🚀`,
+        "color: #ff7a00; font-family: monospace; font-weight: bold;",
+        "color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 14px;",
+        "background: #ff7a00; color: #1a1e23; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-family: monospace;",
+        "color: #ffffff; font-family: 'Poppins', sans-serif; font-size: 14px;"
+    );
+}
 
 
 // --- 2. MUSIC PLAYER CONTROL ---
